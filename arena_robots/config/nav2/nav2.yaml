@@ -137,7 +137,41 @@ local_costmap:
       resolution: 0.1
       footprint: ${footprint}
       footprint_padding: ${footprint_padding:-0.01}
-      plugins: ["voxel_layer", "inflation_layer"]
+      # "${*social_cost_layer_plugins}" splices in "social_cost_layer" (else
+      # nothing) - see social_cost_layer_enabled.yaml/social_cost_layer_disabled.yaml
+      # and the social_cost_layer launch arg. Off by default: pluginlib never
+      # loads the class at all unless social_cost_layer:=true.
+      plugins: ["voxel_layer", "${*social_cost_layer_plugins}", "inflation_layer"]
+      social_cost_layer:
+        plugin: "arena_social_cost_layer/SocialCostLayer"
+        enabled: ${social_cost_layer_enabled}
+        peds_topic: "${env_namespace}/arena_peds"
+        # radius = hard outer clip (cost is exactly 0 beyond it); sigma =
+        # falloff scale, independent of radius. falloff_shape controls the
+        # curve's SHAPE, not cost_scale/cost_bias below - shape=1.0 is a
+        # standard Gaussian bell (decays fastest right around sigma);
+        # shape>1.0 is a "super-Gaussian": flattens into a plateau out to
+        # ~sigma (most of that reads as high cost), then falls off faster
+        # past it. This is what actually grows the "feels maxed" area -
+        # cost_scale stretches the WHOLE curve toward saturation more or
+        # less uniformly and washes out the gradient instead of widening
+        # the high-cost region specifically.
+        personal_space_radius: 1.0
+        personal_space_sigma: 0.9
+        group_extra_radius: 1.6
+        group_sigma: 0.85
+        falloff_shape: 0.9
+        max_cost_value: 10
+        stale_timeout: 0.5
+        # Gain/floor on the normalized (0,1] cost before max_cost_value scaling.
+        # Left near-neutral now that falloff_shape does the widening - only
+        # raise these if the peak itself needs to hit max sooner/the far edge
+        # needs a floor. DWB's BaseObstacle.scale (controllers/dwb/
+        # controller_config.yaml) is the other lever entirely: it decides how
+        # much this layer's cost actually outweighs path/goal critics when
+        # DWB picks a trajectory.
+        cost_scale: 0.8
+        cost_bias: 0.6
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
