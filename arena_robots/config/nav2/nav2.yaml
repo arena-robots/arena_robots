@@ -158,10 +158,10 @@ local_costmap:
         # the high-cost region specifically.
         personal_space_radius: 1.0
         personal_space_sigma: 0.9
-        group_extra_radius: 1.6
+        group_extra_radius: 2.0
         group_sigma: 0.85
-        falloff_shape: 0.9
-        max_cost_value: 10
+        falloff_shape: 3.0
+        max_cost_value: 252
         stale_timeout: 0.5
         # Gain/floor on the normalized (0,1] cost before max_cost_value scaling.
         # Left near-neutral now that falloff_shape does the widening - only
@@ -171,7 +171,7 @@ local_costmap:
         # much this layer's cost actually outweighs path/goal critics when
         # DWB picks a trajectory.
         cost_scale: 0.8
-        cost_bias: 0.6
+        cost_bias: 0.05
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 3.0
@@ -213,7 +213,32 @@ global_costmap:
       resolution: 0.05
       track_unknown_space: true
       rolling_window: false
-      plugins: ["static_layer", "obstacle_layer", "inflation_layer", "mask_overlay_layer"]
+      # plugins: ["static_layer", "obstacle_layer", "inflation_layer", "mask_overlay_layer"]
+      # "${*social_cost_layer_plugins}" splices in "social_cost_layer" (else
+      # nothing), same toggle as local_costmap above. Without this the global
+      # planner (Navfn/Smac) is entirely blind to personal space/O-space and
+      # will route the shortest path straight through people - local DWB/MPPI
+      # critics then fight to stay near that path instead of routing around,
+      # which is what caused "slams into it" / "stalls near groups".
+      plugins: ["static_layer", "obstacle_layer", "${*social_cost_layer_plugins}", "inflation_layer", "mask_overlay_layer"]
+      social_cost_layer:
+        plugin: "arena_social_cost_layer/SocialCostLayer"
+        enabled: ${social_cost_layer_enabled}
+        peds_topic: "${env_namespace}/arena_peds"
+        # Wider/gentler than the local instance on purpose: this feeds a
+        # Dijkstra/A*-style path-cost search (Navfn/Smac), not a rolling
+        # trajectory rollout, so the goal is to bend the GLOBAL path away
+        # from people well before the robot gets close, not to shape a tight
+        # last-mile avoidance envelope (that's still the local layer's job).
+        personal_space_radius: 1.5
+        personal_space_sigma: 1.0
+        group_extra_radius: 2.5
+        group_sigma: 1.0
+        falloff_shape: 2.0
+        max_cost_value: 200
+        stale_timeout: 1.0
+        cost_scale: 1.0
+        cost_bias: 0.0
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
         map_subscribe_transient_local: True
