@@ -48,6 +48,7 @@ def generate_launch_description():
         'social_cost_layer', default_value='false',
         description='enable arena_social_cost_layer in the local costmap (off by default)',
     )
+    params_overlay = LaunchArgument('params_overlay', default_value='')
 
     def nav2_cfg(*parts):
         return PathJoinSubstitution([robots_root, 'config', 'nav2', *parts])
@@ -109,7 +110,10 @@ def generate_launch_description():
     )
 
     substituted_parameters = YAMLReplaceSubstitution(
-        obj=YAMLFileSubstitution(nav2_cfg('nav2.yaml')),
+        obj=YAMLFileSubstitution(YAMLMergeSubstitution(
+            YAMLFileSubstitution(nav2_cfg('nav2.yaml')),
+            YAMLFileSubstitution(params_overlay.substitution, default={}),
+        )),
         substitutions=YAMLFileSubstitution(substitutions)
     )
 
@@ -141,8 +145,6 @@ def generate_launch_description():
         is_planner_only = planner_only.substitution.perform(context).lower() == 'true'
         remappings = [
             ('map_server', '/map_server'),
-            ('/tf', '/tf'),
-            ('/tf_static', '/tf_static'),
         ]
         if tgn:
             remappings.append(('map', PathJoinSubstitution([tgn, 'map'])))
