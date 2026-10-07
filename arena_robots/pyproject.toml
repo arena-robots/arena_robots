@@ -3,6 +3,7 @@ name = "arena_robots"
 version = "0.1.0"
 dependencies = [
     "attrs",
+    "numpy",
     "pyyaml",
 ]
 requires-python = "==3.12.*"
