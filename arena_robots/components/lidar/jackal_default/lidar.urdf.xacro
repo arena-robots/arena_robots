@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
-  <!-- Jackal's own bespoke gpu_lidar (link geometry, joint, gz sensor incl. its odd
-       internal <pose> duplicating the joint's own z-offset, an upstream
-       jackal_description quirk kept as-is). joint_name is separate from
-       frame because jackal's joint is named "lidar_joint", not "${frame}_joint".
-       sim_path forwarded like every other component's gz_frame_id. -->
+  <!-- Jackal's own bespoke gpu_lidar (link geometry, joint, gz sensor). joint_name
+       is separate from frame because jackal's joint is named "lidar_joint", not
+       "${frame}_joint". sim_path forwarded like every other component's gz_frame_id. -->
   <xacro:arg name="sim_path" default=""/>
 
   <xacro:macro name="jackal_lidar_mount" params="parent_link *origin frame:=lidar_link joint_name:=lidar_joint">
@@ -38,7 +36,7 @@
     <gazebo reference="${frame}">
       <sensor name="gpu_lidar" type="gpu_lidar">
         <gz_frame_id>$(arg sim_path)/${frame}</gz_frame_id>
-        <pose>0 0 0.142 0 0 0</pose>
+        <pose>0 0 0 0 0 0</pose>
         <update_rate>10</update_rate>
         <lidar>
           <scan>
