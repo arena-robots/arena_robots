@@ -19,19 +19,28 @@ files, and the `arena feature robots` CLI all look robots up by this name.
 
 Robot-wide identity. Cap data does not live here except for fields that apply
 to any robot regardless of cap: `base_frame` (every robot has a base link),
-`z_offset` (spawn-placement offset, defaults to 0.0), and `sensors` (hardware
+`z_offset` (height of the model root when the robot rests on the ground, defaults to 0.0), and `sensors` (hardware
 sensor declarations, defaults to `[]`).
 
 ```yaml
 robot_model: my_robot       # required; matches the directory name
 base_frame: base_link       # required; TF frame of the robot's base link
-z_offset: 0.37              # optional; metres to lift the robot above the ground plane at spawn
+z_offset: 0.0635            # optional; metres from the ground to the model root with the robot at rest, spawn and teleport place it there
 sensors:                    # optional; declared sensors parsed into SensorSpec entries
   - {name: lidar, type: laserscan, topic: ${namespace}/scan, frame: base_scan}
 ```
 
 Parsed by [`arena_robots.Robot.ModelParams`](../arena_robots/Robot.py). Additional keys pass
 through unchanged; nothing in-tree consumes them.
+
+`sensors` also drives the Nav2 costmap sources ([`arena_robots.nav2`](../arena_robots/nav2.py)).
+The local costmap raytraces planar lidars in a 2D obstacle layer and runs multi-ring lidars
+and depth cameras through a spatio-temporal voxel layer, which clears inside a frustum fitted
+to the sensor's field of view. Field of view and range are read from the gz `<sensor>` element
+of the rendered URDF that the entry's `sensor:` key names, or its `name` when the key is absent
+([`arena_robots.sensor_geometry`](../arena_robots/sensor_geometry.py)). A sensor without such
+an element counts as planar when it only declares a `laserscan`. Otherwise it marks without
+clearing and its obstacles expire after the layer's `voxel_decay`.
 
 ### `caps/`: capability declarations
 
