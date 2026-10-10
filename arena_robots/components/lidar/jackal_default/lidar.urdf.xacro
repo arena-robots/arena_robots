@@ -6,21 +6,22 @@
   <xacro:arg name="sim_path" default=""/>
 
   <xacro:macro name="jackal_lidar_mount" params="parent_link *origin frame:=lidar_link joint_name:=lidar_joint">
+    <xacro:property name="body_z" value="-0.142"/>
     <link name="${frame}">
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 ${body_z}" rpy="0 0 0"/>
         <mass value="0.1"/>
         <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
       </inertial>
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 ${body_z}" rpy="0 0 0"/>
         <geometry>
           <cylinder radius="0.05" length="0.1"/>
         </geometry>
         <material name="black"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 ${body_z}" rpy="0 0 0"/>
         <geometry>
           <cylinder radius="0.05" length="0.1"/>
         </geometry>
