@@ -47,6 +47,7 @@ class Nav2Bringup(Bringup):
         task_generator_node: str = "",
         env_namespace: str = "",
         sensors: list[SensorSpec] | None = None,
+        social_cost_layer: bool = False,
         params_overlay: str = "",
         agent: str = "",
         **_: object,
@@ -74,6 +75,7 @@ class Nav2Bringup(Bringup):
             "train_mode": str(train_mode).lower(),
             "task_generator_node": task_generator_node,
             "env_namespace": env_namespace,
+            "social_cost_layer": str(social_cost_layer).lower(),
             "params_overlay": params_overlay,
             "agent": agent_name,
         }
