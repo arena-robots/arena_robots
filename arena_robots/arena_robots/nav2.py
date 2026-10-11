@@ -358,7 +358,8 @@ class Nav2KinematicsDerivedYAML(YAMLFileSubstitution):
 class Nav2CollisionDerivedYAML(YAMLFileSubstitution):
     """Compile top-level `footprint` and `polygons_dict` from caps/mobile.yaml
     into the stringified form nav2's collision_monitor expects, overriding any
-    raw float lists emitted by the preceding YAMLFileSubstitution(mobile_path)."""
+    raw float lists emitted by the preceding YAMLFileSubstitution(mobile_path),
+    and emit the costmaps' `inflation_radius`."""
 
     def __init__(self, mobile_path: launch.SomeSubstitutionsType):
         super().__init__(path=[], default={}, substitute=False)
@@ -378,6 +379,10 @@ class Nav2CollisionDerivedYAML(YAMLFileSubstitution):
         padding = mobile.footprint_padding
         if padding is not None:
             out['footprint_padding'] = padding
+
+        inflation = mobile.inflation_radius
+        if inflation is not None:
+            out['inflation_radius'] = inflation
 
         polygons_raw = raw.get('polygons_dict')
         if isinstance(polygons_raw, dict) and polygons_raw:

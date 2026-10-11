@@ -78,7 +78,7 @@ is_holonomic: false
 
 footprint: [[0.5, 0.35], [0.5, -0.35], [-0.5, -0.35], [-0.5, 0.35]]
 footprint_padding: 0.1        # optional
-inflation_radius: 0.25        # optional
+inflation_radius: 0.9         # optional, default: outer radius of the padded footprint or radius, + 0.4
 polygons_dict:
   StopPolygon: {type: polygon, points: [...], action_type: stop}
 

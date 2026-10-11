@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import ast
 import copy
+import math
 import subprocess
 import typing
 import xml.etree.ElementTree as ET
@@ -288,6 +289,9 @@ class CapConfig:
         return v
 
 
+INFLATION_MARGIN = 0.4
+
+
 @attrs.define(slots=False)
 class MobileSpec(CapConfig):
     """Primitives from caps/mobile.yaml (flat, single-instance)."""
@@ -335,8 +339,15 @@ class MobileSpec(CapConfig):
 
     @property
     def inflation_radius(self) -> float | None:
+        """Costmap inflation radius, the outer radius of the padded footprint or `radius` plus INFLATION_MARGIN unless set."""
         v = self.raw.get('inflation_radius')
-        return None if v is None else float(v)
+        if v is not None:
+            return float(v)
+        footprint = self.footprint
+        outer = [max(math.hypot(x, y) for x, y in footprint) + (self.footprint_padding or 0.0)] if footprint else []
+        if self.radius is not None:
+            outer.append(self.radius)
+        return max(outer) + INFLATION_MARGIN if outer else None
 
     @property
     def velocity_limits(self) -> VelocityLimits | None:

@@ -15,7 +15,6 @@ polygons_dict:
     polygon_pub_topic: polygon_stop
     enabled: true
 
-inflation_radius: 0.25
 footprint_padding: 0.1
 
 actions:
