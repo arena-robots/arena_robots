@@ -14,6 +14,7 @@ controller_manager:
 
 arm_controller:
   ros__parameters:
+    allow_nonzero_velocity_at_trajectory_end: true
     joints:
       - arm_shoulder_pan_joint
       - arm_shoulder_lift_joint

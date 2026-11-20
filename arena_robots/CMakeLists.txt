@@ -37,6 +37,7 @@ install(PROGRAMS scripts/goal_to_plan_bridge DESTINATION lib/${PROJECT_NAME})
 install(PROGRAMS scripts/power_publisher DESTINATION lib/${PROJECT_NAME})
 install(PROGRAMS scripts/acoustics_publisher DESTINATION lib/${PROJECT_NAME})
 install(PROGRAMS scripts/meshnav_obstacles DESTINATION lib/${PROJECT_NAME})
+install(PROGRAMS scripts/lever_door_opener DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_pytest REQUIRED)
