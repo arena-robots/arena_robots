@@ -38,6 +38,27 @@ def generate_launch_description():
         if moveit_params is None:
             raise ValueError(f"{robot_name}: missing 'arm' cap or caps.moveit block; cannot launch moveit adapter")
 
+        servo_config = {
+            "move_group_name": "ur_manipulator",
+            "planning_frame": f"{tf_prefix}arm_base_link",
+            "ee_frame_name": f"{tf_prefix}arm_tool0",
+            "command_in_type": "speed_units",
+            "publish_period": 0.01,
+             "scale": {
+                "linear": 0.08,
+                "rotational": 0.1,
+                "joint": 0.1,
+            },
+            "command_out_type": "trajectory_msgs/JointTrajectory",
+            "command_out_topic": "arm_controller/joint_trajectory",
+            "joint_topic": "joint_states",
+            "is_primary_planning_scene_monitor": False,
+            "check_collisions": True,
+            "lower_singularity_threshold": 40.0,
+            "hard_stop_singularity_threshold": 80.0,
+            "leaving_singularity_threshold_multiplier": 2.0,
+        }
+
         move_group = Node(
             package="moveit_ros_move_group",
             executable="move_group",
@@ -48,6 +69,17 @@ def generate_launch_description():
             ],
         )
 
-        return [PushRosNamespace(ns), move_group]
+        servo_node = Node(
+            package="moveit_servo",
+            executable="servo_node",
+            output="screen",
+            parameters=[
+                moveit_params,
+                {"moveit_servo": servo_config},
+                {"use_sim_time": sim},
+            ],
+        )
+
+        return [PushRosNamespace(ns), move_group, servo_node]
 
     return LaunchDescription([*ld_items, OpaqueFunction(function=launch_setup)])
